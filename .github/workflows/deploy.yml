@@ -16,14 +16,12 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
 
       - name: Instalar dependencias
-        working-directory: examen-angular
         run: npm ci
 
       - name: Compilar Angular en producción
-        working-directory: examen-angular
         run: npm run build -- --configuration production
 
       - name: Configurar clave SSH
@@ -37,5 +35,5 @@ jobs:
         run: |
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
-            examen-angular/dist/examen-angular/browser/ \
+            dist/*/browser/ \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/html/examen/
