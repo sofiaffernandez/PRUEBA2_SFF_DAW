@@ -1,13 +1,10 @@
-name: CI/CD - Build y Deploy Angular
-
-on:
-  push:
-    branches:
-      - main
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: examen-angular
 
     steps:
       - name: Clonar repositorio
@@ -21,23 +18,7 @@ jobs:
           cache-dependency-path: examen-angular/package-lock.json
 
       - name: Instalar dependencias
-        working-directory: examen-angular
         run: npm ci
 
       - name: Compilar Angular en producción
-        working-directory: examen-angular
         run: npx ng build --configuration production
-
-      - name: Configurar clave SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Desplegar al VPS
-        run: |
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
-            examen-angular/dist/examen-angular/browser/ \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/html/examen/
